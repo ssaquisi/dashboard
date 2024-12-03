@@ -1,5 +1,6 @@
 {/* Hooks */ }
 import { useEffect, useState } from 'react';
+import Item from './interface/Item';
 
 
 import IndicatorWeather from './components/IndicatorWeather';
@@ -19,11 +20,17 @@ interface Indicator {
 }
 
 
+
+
 function App() {
 
   {/* Variable de estado y función de actualización */ }
   let [indicators, setIndicators] = useState<Indicator[]>([])
   let [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"))
+  let [items, setItems] = useState<Item[]>([]);
+
+
+
 
   {/* Hook: useEffect */ }
   useEffect(() => {
@@ -64,40 +71,77 @@ function App() {
         setOWM(savedTextXML)
       }
 
-        if (savedTextXML) {
-          {/* XML Parser */ }
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(savedTextXML, "application/xml");
+      if (savedTextXML) {
+        {/* XML Parser */ }
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(savedTextXML, "application/xml");
 
-          {/* Arreglo para agregar los resultados */ }
+        {/* Arreglo para agregar los resultados */ }
 
-          let dataToIndicators: Indicator[] = new Array<Indicator>();
+        let dataToIndicators: Indicator[] = new Array<Indicator>();
+        let dataToItems: Item[] = new Array<Item>();
 
-          {/* 
+        {/* 
            Análisis, extracción y almacenamiento del contenido del XML 
            en el arreglo de resultados
        */}
 
-          let name = xml.getElementsByTagName("name")[0].innerHTML || ""
-          dataToIndicators.push({ "title": "Location", "subtitle": "City", "value": name })
+        let name = xml.getElementsByTagName("name")[0].innerHTML || ""
+        dataToIndicators.push({ "title": "Location", "subtitle": "City", "value": name })
 
-          let location = xml.getElementsByTagName("location")[1]
+        let location = xml.getElementsByTagName("location")[1]
 
-          let latitude = location.getAttribute("latitude") || ""
-          dataToIndicators.push({ "title": "Location", "subtitle": "Latitude", "value": latitude })
+        let latitude = location.getAttribute("latitude") || ""
+        dataToIndicators.push({ "title": "Location", "subtitle": "Latitude", "value": latitude })
 
-          let longitude = location.getAttribute("longitude") || ""
-          dataToIndicators.push({ "title": "Location", "subtitle": "Longitude", "value": longitude })
+        let longitude = location.getAttribute("longitude") || ""
+        dataToIndicators.push({ "title": "Location", "subtitle": "Longitude", "value": longitude })
 
-          let altitude = location.getAttribute("altitude") || ""
-          dataToIndicators.push({ "title": "Location", "subtitle": "Altitude", "value": altitude })
+        let altitude = location.getAttribute("altitude") || ""
+        dataToIndicators.push({ "title": "Location", "subtitle": "Altitude", "value": altitude })
 
-          //console.log( dataToIndicators )
+        //console.log( dataToIndicators )
 
-          {/* Modificación de la variable de estado mediante la función de actualización */ }
-          setIndicators(dataToIndicators)
+        let times = xml.getElementsByTagName("time");
 
+        // Para extraer los datos de los elementos que nos piden y la cantidad de 6 en la tabla
+
+        for (let i = 0; i < Math.min(6, times.length); i++) {
+          let time = times[i];
+          let from = time.getAttribute("from") || "";
+          let to = time.getAttribute("to") || "";
+          let precipitation = time.getElementsByTagName("precipitation")[0]?.getAttribute("probability") || "";
+          let humidity = time.getElementsByTagName("humidity")[0]?.getAttribute("value") || "";
+          let clouds = time.getElementsByTagName("clouds")[0]?.getAttribute("all") || "";
+
+          const formatTime = (timeString: string) => {
+            const date = new Date(timeString);
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const seconds = date.getSeconds();
+            return `${hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+          };
         
+          let fromFormat= formatTime(from);
+          let toFormat = formatTime(to);
+
+          let item: Item = {
+            dateStart: fromFormat,
+            dateEnd: toFormat,
+            precipitation: precipitation,
+            humidity: humidity,
+            clouds: clouds
+          };
+
+          dataToItems.push(item);
+        };
+
+
+        {/* Modificación de la variable de estado mediante la función de actualización */ }
+        setIndicators(dataToIndicators);
+        setItems(dataToItems);
+
+
       }
     }
 
@@ -147,7 +191,7 @@ function App() {
             <ControlWeather />
           </Grid>
           <Grid size={{ xs: 12, xl: 9 }}>
-            <TableWeather />
+            <TableWeather itemsIn={items} />
           </Grid>
         </Grid>
 

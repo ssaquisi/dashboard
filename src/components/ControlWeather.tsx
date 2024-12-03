@@ -18,7 +18,7 @@ export default function ControlWeather() {
     const descriptionRef = useRef<HTMLDivElement>(null);
 
     {/* Variable de estado y función de actualización */ }
-    let [selected, setSelected] = useState(-1)
+    let [, setSelected] = useState(-1)
 
     {/* Arreglo de objetos */ }
     let items = [
