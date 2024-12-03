@@ -87,18 +87,18 @@ function App() {
        */}
 
         let name = xml.getElementsByTagName("name")[0].innerHTML || ""
-        dataToIndicators.push({ "title": "Location", "subtitle": "City", "value": name })
+        dataToIndicators.push({ "title": "Ciudad", "subtitle": "City", "value": name })
 
         let location = xml.getElementsByTagName("location")[1]
 
         let latitude = location.getAttribute("latitude") || ""
-        dataToIndicators.push({ "title": "Location", "subtitle": "Latitude", "value": latitude })
+        dataToIndicators.push({ "title": "Latitud", "subtitle": "Latitude", "value": latitude })
 
         let longitude = location.getAttribute("longitude") || ""
-        dataToIndicators.push({ "title": "Location", "subtitle": "Longitude", "value": longitude })
+        dataToIndicators.push({ "title": "Longitud", "subtitle": "Longitude", "value": longitude })
 
         let altitude = location.getAttribute("altitude") || ""
-        dataToIndicators.push({ "title": "Location", "subtitle": "Altitude", "value": altitude })
+        dataToIndicators.push({ "title": "Altitud", "subtitle": "Altitude", "value": altitude })
 
         //console.log( dataToIndicators )
 
