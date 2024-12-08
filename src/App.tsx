@@ -114,12 +114,12 @@ function App() {
           let humidity = time.getElementsByTagName("humidity")[0]?.getAttribute("value") || "";
           let clouds = time.getElementsByTagName("clouds")[0]?.getAttribute("all") || "";
 
-          const formatTime = (timeString: string) => {
+          const formatTime = (timeString: string | number | Date) => {
             const date = new Date(timeString);
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
-            const seconds = date.getSeconds();
-            return `${hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
           };
         
           let fromFormat= formatTime(from);
