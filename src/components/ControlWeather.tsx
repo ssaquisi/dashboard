@@ -8,12 +8,16 @@ import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-// import Select from '@mui/material/Select';
+
+{/* Interfaz SelectChangeEvent */ }
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
+interface ControlWeatherProps {
+    onVariableChange: (selectedIdx: number) => void;
+}
 
 
-export default function ControlWeather() {
+export default function ControlWeather({ onVariableChange }: ControlWeatherProps) {
     {/* Constante de referencia a un elemento HTML */ }
     const descriptionRef = useRef<HTMLDivElement>(null);
 
@@ -22,6 +26,7 @@ export default function ControlWeather() {
 
     {/* Arreglo de objetos */ }
     let items = [
+        { "name": "Todos", "description": "" },
         { "name": "Precipitación", "description": "Cantidad de agua que cae sobre una superficie en un período específico." },
         { "name": "Humedad", "description": "Cantidad de vapor de agua presente en el aire, generalmente expresada como un porcentaje." },
         { "name": "Nubosidad", "description": "Grado de cobertura del cielo por nubes, afectando la visibilidad y la cantidad de luz solar recibida." }
@@ -36,6 +41,7 @@ export default function ControlWeather() {
         let idx = parseInt(event.target.value)
         //alert( idx );
         setSelected(idx);
+        onVariableChange(idx); // Actualiza el estado en App.tsx
 
         {/* Modificación de la referencia descriptionRef */ }
         if (descriptionRef.current !== null) {

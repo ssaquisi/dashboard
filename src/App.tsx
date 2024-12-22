@@ -1,17 +1,15 @@
-{/* Hooks */ }
-import { useEffect, useState } from 'react';
 import Item from './interface/Item';
-
-
+import LineChartData from './interface/LineChartData';
 import IndicatorWeather from './components/IndicatorWeather';
 import TableWeather from './components/TableWeather';
 import ControlWeather from './components/ControlWeather';
 import LineChartWeather from './components/LineChartWeather';
-
-
+import DrawerAppBar from './components/DrawerAppBar';
 import Grid from '@mui/material/Grid2'
-
 import './App.css'
+
+{/* Hooks */ }
+import { useEffect, useState } from 'react';
 
 interface Indicator {
   title?: String;
@@ -19,16 +17,14 @@ interface Indicator {
   value?: String;
 }
 
-
-
-
 function App() {
 
   {/* Variable de estado y función de actualización */ }
   let [indicators, setIndicators] = useState<Indicator[]>([])
   let [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"))
   let [items, setItems] = useState<Item[]>([]);
-
+  let [chartData, setChartData] = useState<LineChartData | null>(null);
+  let [selectedVariable, setSelectedVariable] = useState<number>(-1);
 
 
 
@@ -71,15 +67,20 @@ function App() {
         setOWM(savedTextXML)
       }
 
+      {/* Valide el procesamiento con el valor de savedTextXML */ }
       if (savedTextXML) {
-        {/* XML Parser */ }
         const parser = new DOMParser();
         const xml = parser.parseFromString(savedTextXML, "application/xml");
 
         {/* Arreglo para agregar los resultados */ }
-
         let dataToIndicators: Indicator[] = new Array<Indicator>();
         let dataToItems: Item[] = new Array<Item>();
+        let dataToChartData: LineChartData = {
+          xDays: [],
+          precipitation: [],
+          humidity: [],
+          clouds: [],
+        };
 
         {/* 
            Análisis, extracción y almacenamiento del contenido del XML 
@@ -101,8 +102,31 @@ function App() {
         dataToIndicators.push({ "title": "Altitud", "subtitle": "Altitude", "value": altitude })
 
         //console.log( dataToIndicators )
+        const dailyData: Record<string, {
+          precipitation: number[];
+          humidity: number[];
+          clouds: number[];
+        }> = {};
 
         let times = xml.getElementsByTagName("time");
+
+        // Para los datos del gráfico
+        for (let i = 0; i < times.length; i++) {
+          let time = times[i];
+          let precipitation = time.getElementsByTagName("precipitation")[0]?.getAttribute("probability") || "";
+          let humidity = time.getElementsByTagName("humidity")[0]?.getAttribute("value") || "";
+          let clouds = time.getElementsByTagName("clouds")[0]?.getAttribute("all") || "";
+
+          const from2 = time.getAttribute('from')?.split('T') || "N/A";
+          const date = from2[0];
+          if (date && !dailyData[date]) {
+            dailyData[date] = { precipitation: [], humidity: [], clouds: [] };
+          }
+          dailyData[date].precipitation.push(precipitation ? parseFloat(precipitation) * 100 : 0);
+          dailyData[date].humidity.push(humidity ? parseFloat(humidity) : 0);
+          dailyData[date].clouds.push(clouds ? parseFloat(clouds) : 0);
+
+        }
 
         // Para extraer los datos de los elementos que nos piden y la cantidad de 6 en la tabla
 
@@ -114,6 +138,12 @@ function App() {
           let humidity = time.getElementsByTagName("humidity")[0]?.getAttribute("value") || "";
           let clouds = time.getElementsByTagName("clouds")[0]?.getAttribute("all") || "";
 
+          const from2 = time.getAttribute('from')?.split('T') || "N/A";
+          const date = from2[0];
+          if (date && !dailyData[date]) {
+            dailyData[date] = { precipitation: [], humidity: [], clouds: [] };
+          }
+
           const formatTime = (timeString: string | number | Date) => {
             const date = new Date(timeString);
             const hours = String(date.getHours()).padStart(2, '0');
@@ -121,8 +151,8 @@ function App() {
             const seconds = String(date.getSeconds()).padStart(2, '0');
             return `${hours}:${minutes}:${seconds}`;
           };
-        
-          let fromFormat= formatTime(from);
+
+          let fromFormat = formatTime(from);
           let toFormat = formatTime(to);
 
           let item: Item = {
@@ -136,10 +166,18 @@ function App() {
           dataToItems.push(item);
         };
 
+        for (const [date, data] of Object.entries(dailyData)) {
+          dataToChartData.xDays.push(new Date(date).toLocaleDateString()); // Format as DD/MM
+          dataToChartData.precipitation.push(data.precipitation.reduce((a, b) => a + b, 0) / data.precipitation.length);
+          dataToChartData.humidity.push(data.humidity.reduce((a, b) => a + b, 0) / data.humidity.length);
+          dataToChartData.clouds.push(data.clouds.reduce((a, b) => a + b, 0) / data.clouds.length);
+        }
+
 
         {/* Modificación de la variable de estado mediante la función de actualización */ }
         setIndicators(dataToIndicators);
         setItems(dataToItems);
+        setChartData(dataToChartData);
 
 
       }
@@ -149,61 +187,68 @@ function App() {
 
   }, [owm])
 
+  let handleVariableChange = (selectedIdx: number) => {
+    setSelectedVariable(selectedIdx);
+  };
 
   let renderIndicators = () => {
 
-    return indicators
-      .map(
-        (indicator, idx) => (
-          <Grid key={idx} size={{ xs: 12, xl: 3 }}>
-            <IndicatorWeather
-              title={indicator["title"]}
-              subtitle={indicator["subtitle"]}
-              value={indicator["value"]} />
-          </Grid>
-        )
-      )
+    return indicators.map((indicator, idx) => (
+      <Grid key={idx} size={{ xs: 12, xl: 3 }}>
+        <IndicatorWeather
+          title={indicator["title"]}
+          subtitle={indicator["subtitle"]}
+          value={indicator["value"]} />
+      </Grid>
+    )
+    )
 
   }
 
 
+  {/* JSX */ }
   return (
-    <Grid container spacing={5}>
+    <div className="App" id='Principal'>
+      <DrawerAppBar />
+      <div><h1 id="Titulos"> INFORMACIÓN GEOGRÁFICA</h1></div>
+      <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+        
 
-      {/* Indicadores */}
-      {/*<Grid size={{ xs: 12, xl: 3 }}><IndicatorWeather title={'Indicator 1'} subtitle={'Unidad 1'} value={"1.23"} />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 3 }}><IndicatorWeather title={'Indicator 2'} subtitle={'Unidad 2'} value={"3.12"} />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 3 }}><IndicatorWeather title={'Indicator 3'} subtitle={'Unidad 3'} value={"2.31"} />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 3 }}><IndicatorWeather title={'Indicator 4'} subtitle={'Unidad 4'} value={"3.21"} />
-      </Grid>*/}
-
-      {renderIndicators()}
+        {/* Indicadores */}
+        {renderIndicators()}
 
 
-      {/* Tabla */}
-      <Grid size={{ xs: 12, xl: 8 }}>
-        {/* Grid Anidado */}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, xl: 3 }}>
-            <ControlWeather />
+        <div id='Zona Metereológica'>
+          <h1 id="Titulos"> ZONA METEOROLÓGICAS</h1>
+        </div>
+
+          {/* Grafico */}
+          <Grid container spacing={2} sx={{
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+
+            <Grid size={{ xs: 12, xl: 3 }}>
+              <ControlWeather onVariableChange={handleVariableChange} />
+            </Grid>
+            <Grid size={{ xs: 12, xl: 9 }}>
+              {chartData && (
+                <LineChartWeather chartData={chartData} selectedVariable={selectedVariable} />
+              )}
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, xl: 9 }}>
-            <TableWeather itemsIn={items} />
-          </Grid>
-        </Grid>
+        
+
+        <div>
+          <h1 id="Titulos"> PREDICCIONES METEOROLÓGICAS</h1>
+        </div>
+
+        {/* Tabla */}
+        <TableWeather itemsIn={items} />
 
       </Grid>
-
-
-      {/* Gráfico */}
-      <Grid size={{ xs: 12, xl: 4 }}>
-        <LineChartWeather />
-      </Grid>
-
-    </Grid >
+    </div>
   )
 }
 
