@@ -19,7 +19,7 @@ interface Props {
 }
 
 const drawerWidth = 240;
-const navItems = ['Principal', 'Zona Metereológica'];
+const navItems = ['Principal', 'Zona Meteorológica'];
 
 export default function DrawerAppBar(props: Props) {
     const { window } = props;

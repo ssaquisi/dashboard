@@ -208,7 +208,7 @@ function App() {
 
   {/* JSX */ }
   return (
-    <div className="App" id='Principal'>
+    <div className="App" id='Principal' style={{backgroundColor:'#fff'}}>
       <DrawerAppBar />
       <div><h1 id="Titulos"> INFORMACIÓN GEOGRÁFICA</h1></div>
       <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -219,7 +219,7 @@ function App() {
 
 
         <div id='Zona Metereológica'>
-          <h1 id="Titulos"> ZONA METEOROLÓGICAS</h1>
+          <h1 id="Titulos"> ZONA METEOROLÓGICA</h1>
         </div>
 
           {/* Grafico */}

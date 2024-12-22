@@ -23,10 +23,10 @@ export default function BasicTable(props: MyProp) {
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table" sx={{ 
-      backgroundColor: '#cad1de', // Fondo de la tabla
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Sombra del contenedor
-      borderRadius: '8px', // Bordes redondeados
-      padding: '16px', // Espaciado interno
+      backgroundColor: '#e5e9f1', // Fondo de la tabla
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
+      borderRadius: '8px',
+      padding: '16px', 
     }}>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#34495e' }}>
