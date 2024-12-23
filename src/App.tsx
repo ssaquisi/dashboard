@@ -10,6 +10,8 @@ import './App.css'
 
 {/* Hooks */ }
 import { useEffect, useState } from 'react';
+import WeatherDisplay from './components/WeatherDisplay';
+import WeatherData from './interface/WeatherData';
 
 interface Indicator {
   title?: String;
@@ -25,7 +27,7 @@ function App() {
   let [items, setItems] = useState<Item[]>([]);
   let [chartData, setChartData] = useState<LineChartData | null>(null);
   let [selectedVariable, setSelectedVariable] = useState<number>(-1);
-
+  let [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
 
   {/* Hook: useEffect */ }
@@ -88,18 +90,18 @@ function App() {
        */}
 
         let name = xml.getElementsByTagName("name")[0].innerHTML || ""
-        dataToIndicators.push({ "title": "Ciudad", "subtitle": "City", "value": name })
+        dataToIndicators.push({ "title": "Ciudad", "subtitle": "", "value": name })
 
         let location = xml.getElementsByTagName("location")[1]
 
         let latitude = location.getAttribute("latitude") || ""
-        dataToIndicators.push({ "title": "Latitud", "subtitle": "Latitude", "value": latitude })
+        dataToIndicators.push({ "title": "Latitud", "subtitle": "", "value": latitude })
 
         let longitude = location.getAttribute("longitude") || ""
-        dataToIndicators.push({ "title": "Longitud", "subtitle": "Longitude", "value": longitude })
+        dataToIndicators.push({ "title": "Longitud", "subtitle": "", "value": longitude })
 
         let altitude = location.getAttribute("altitude") || ""
-        dataToIndicators.push({ "title": "Altitud", "subtitle": "Altitude", "value": altitude })
+        dataToIndicators.push({ "title": "Altitud", "subtitle": "", "value": altitude })
 
         //console.log( dataToIndicators )
         const dailyData: Record<string, {
@@ -173,11 +175,36 @@ function App() {
           dataToChartData.clouds.push(data.clouds.reduce((a, b) => a + b, 0) / data.clouds.length);
         }
 
+        // Para datos de la tarjeta
+        let weatherData: WeatherData | null = null;
+
+        const locationNode = xml.getElementsByTagName("name")[0];
+        const tempNode = xml.getElementsByTagName("temperature")[0];
+        const conditionNode = xml.getElementsByTagName("symbol")[0];
+        const windNode = xml.getElementsByTagName("windSpeed")[0];
+        const windDirNode = xml.getElementsByTagName("windDirection")[0];
+        const visibilityNode = xml.getElementsByTagName("visibility")[0];
+
+        if (locationNode && tempNode && conditionNode && windNode && windDirNode && visibilityNode) {
+          weatherData = {
+            location: locationNode.textContent || "Desconocido",
+            temperatureK: parseFloat(tempNode.getAttribute("value") || "0"),
+            condition: conditionNode.getAttribute("name") || "Desconocido",
+            windSpeed: parseFloat(windNode.getAttribute("mps") || "0"),
+            windDirection: windDirNode.getAttribute("name") || "N/A",
+            visibility: parseInt(visibilityNode.getAttribute("value") || "0"),
+            lastUpdated: new Date().toISOString(),
+          };
+        }
+
+
 
         {/* Modificación de la variable de estado mediante la función de actualización */ }
         setIndicators(dataToIndicators);
         setItems(dataToItems);
         setChartData(dataToChartData);
+        setWeatherData(weatherData);
+
 
 
       }
@@ -208,40 +235,54 @@ function App() {
 
   {/* JSX */ }
   return (
-    <div className="App" id='Principal' style={{backgroundColor:'#fff'}}>
+    <div className="App" id='Principal' style={{ backgroundColor: '#fff' }}>
       <DrawerAppBar />
-      <div><h1 id="Titulos"> INFORMACIÓN GEOGRÁFICA</h1></div>
+      <div style={{
+        backgroundColor: 'white',
+        border: '1px solid #ccc',
+        borderRadius: '10px',
+        padding: '20px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        width: '100%'
+      }}>
+        <WeatherDisplay weatherData={weatherData} />
+      </div>
+      <br></br>
+      <br />
+      <div>
+        <h1 id="Titulos"> INFORMACIÓN GEOGRÁFICA</h1>
+        </div>
       <Grid container spacing={5} sx={{ justifyContent: 'center', alignItems: 'center' }}>
-        
+
 
         {/* Indicadores */}
         {renderIndicators()}
 
 
-        <div id='Zona Metereológica'>
+        <div>
           <h1 id="Titulos"> ZONA METEOROLÓGICA</h1>
         </div>
 
-          {/* Grafico */}
-          <Grid container spacing={2} sx={{
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
+        {/* Grafico */}
+        <Grid id='Más información' container spacing={2} sx={{
+          width: '100%',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
 
-            <Grid size={{ xs: 12, xl: 3 }}>
-              <ControlWeather onVariableChange={handleVariableChange} />
-            </Grid>
-            <Grid size={{ xs: 12, xl: 9 }}>
-              {chartData && (
-                <LineChartWeather chartData={chartData} selectedVariable={selectedVariable} />
-              )}
-            </Grid>
+          <Grid size={{ xs: 12, xl: 3 }}>
+            <ControlWeather onVariableChange={handleVariableChange} />
           </Grid>
-        
+          <Grid size={{ xs: 12, xl: 9 }}>
+            {chartData && (
+              <LineChartWeather chartData={chartData} selectedVariable={selectedVariable} />
+            )}
+          </Grid>
+        </Grid>
+
 
         <div>
-          <h1 id="Titulos"> PREDICCIONES METEOROLÓGICAS</h1>
+          <h1 id="Titulos"> HISTORIAL CLIMÁTICO</h1>
         </div>
 
         {/* Tabla */}

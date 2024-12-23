@@ -61,7 +61,7 @@ export default function ControlWeather({ onVariableChange }: ControlWeatherProps
             }}
         >
 
-            <Typography mb={2} component="h3" variant="h6" color="primary">
+            <Typography mb={2} component="h3" variant="h6" color="#34495e" style={{ fontWeight: 'bold'}}>
                 Variables Meteorológicas
             </Typography>
 

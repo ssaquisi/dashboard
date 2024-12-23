@@ -19,7 +19,7 @@ interface Props {
 }
 
 const drawerWidth = 240;
-const navItems = ['Principal', 'Zona Meteorológica'];
+const navItems = ['Principal', 'Más información'];
 
 export default function DrawerAppBar(props: Props) {
     const { window } = props;
@@ -76,7 +76,7 @@ export default function DrawerAppBar(props: Props) {
                         component="div"
                         sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' }, textAlign:'left', color: '#fff', fontWeight:'bold' }}
                     >
-                        𓂃 ࣪˖ ִֶָ𐀔 PREDICCIONES CELESTIALES
+                        𓂃 ࣪˖ ִֶָ𐀔 PREDICCIONES GUAYACAS
                     </Typography>
                     <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                         {navItems.map((item) => (
@@ -107,7 +107,7 @@ export default function DrawerAppBar(props: Props) {
             <Box component="main" sx={{ p: 3 }}>
                 <Toolbar />
                 <div id='Principal'></div>
-                <div id='Zona Meteorológica'></div>
+                <div id='Más información'></div>
             </Box>
         </Box>
     );

@@ -32,8 +32,8 @@ export default function BasicTable(props: MyProp) {
           <TableRow sx={{ backgroundColor: '#34495e' }}>
             <TableCell sx={{ fontWeight: 'bold', color:'#fff'  }}>Hora de inicio</TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff' }}>Hora de fin</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff'  }}>Precipitación</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff' }}>Humedad</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff'  }}>Precipitación (%)</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff' }}>Humedad (%)</TableCell>
             <TableCell align="right" sx={{ fontWeight: 'bold', color:'#fff'  }}>Nubosidad</TableCell>
           </TableRow>
         </TableHead>
